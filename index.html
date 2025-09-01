@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masjid Timings | Solapur</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Annapurna+SIL:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Transliteration library for smart search -->
+    <script src="https://cdn.jsdelivr.net/npm/indic-transliteration@2.0.0/dist/bundle.umd.js"></script>
+    <style>
+        :root {
+            --primary-bg: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --heading-color: #1a202c;
+            --primary-color: #3498db;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --font-family: 'Annapurna SIL', sans-serif; /* Change this one line to update the font */
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 700px; margin: 0 auto; padding: 20px 0; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+        header h1 {
+            font-size: 1.6rem; /* Slightly adjusted for balance */
+            font-weight: 700;
+            color: var(--heading-color);
+            margin: 0;
+            text-align: left;
+        }
+        
+        /* --- Search Bar --- */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        #search-input {
+            width: 0;
+            padding: 10px 0;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            font-size: 1rem;
+            font-family: var(--font-family);
+            box-sizing: border-box;
+            outline: none;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        
+        .search-container.active #search-input {
+            width: 250px;
+            opacity: 1;
+            border-color: var(--border-color);
+            padding: 10px 15px 10px 20px;
+        }
+
+        #search-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        #search-icon-btn:hover {
+            background-color: #e0e0e0;
+        }
+        #search-icon-btn svg {
+            width: 24px;
+            height: 24px;
+            color: #555;
+        }
+        #search-input:disabled + #search-icon-btn {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+
+        /* --- Loading Spinner & Messages --- */
+        .loader {
+            border: 5px solid #f3f3f3; border-top: 5px solid var(--primary-color);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 40px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .info-message {
+            text-align: center; color: #718096; padding: 20px;
+        }
+        .error-message {
+            text-align: center; background: #fffbe6; color: #92400e; padding: 15px;
+            border-radius: 8px; border: 1px solid #fde68a;
+        }
+
+        /* --- Announcement Card --- */
+        #announcements-container {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .announcement-card {
+            background-color: #e6f6ff;
+            color: #2c5282;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .announcement-card span {
+            font-size: 1.5rem;
+        }
+         .announcement-card p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .masjid-list { display: grid; gap: 16px; }
+        .masjid-card {
+            background: var(--card-bg); border-radius: 12px; padding: 20px 25px;
+            box-shadow: var(--shadow); border: 1px solid var(--border-color);
+            cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: left; width: 100%; border: none; font-size: 1.1em;
+            font-weight: 600; color: #2d3748; display: flex;
+            justify-content: flex-start; align-items: center;
+        }
+        .masjid-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px);
+            align-items: center; justify-content: center;
+            padding: 15px; box-sizing: border-box; animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content {
+            background-color: var(--card-bg); margin: auto; padding: 30px;
+            border-radius: 16px; box-shadow: var(--shadow-lg);
+            width: 100%; max-width: 500px; position: relative;
+            animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        @keyframes slideUp { from { transform: translateY(30px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        
+        .close-btn {
+            color: #999; position: absolute; top: 15px; right: 20px; font-size: 28px;
+            font-weight: bold; line-height: 1; cursor: pointer; transition: color 0.2s, transform 0.2s;
+        }
+        .close-btn:hover { color: #333; transform: rotate(90deg); }
+
+        #modal-masjid-name {
+            margin-top: 0; font-size: 1.5rem; font-weight: 700; color: var(--heading-color);
+            border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;
+        }
+        
+        .location-link-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+        .location-link-container a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .location-link-container a:hover {
+            text-decoration: underline;
+        }
+
+        .special-note {
+            font-size: 0.9em; background-color: #e6f6ff; color: #2c5282;
+            border-left: 4px solid var(--primary-color); padding: 12px 15px;
+            margin-top: 20px; border-radius: 6px;
+        }
+        
+        .timing-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .timing-table th, .timing-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .timing-table th { 
+            font-weight: 700; /* Bolder heading */
+            font-size: 0.9rem; 
+            color: #718096; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        .timing-table tr:last-child td { border-bottom: none; }
+        .timing-table td:nth-child(1) {
+            font-weight: 700; /* Bolder prayer name */
+            font-size: 1.05em; /* Larger prayer name */
+            color: #4a5568;
+        }
+        .timing-table td:nth-child(2), .timing-table td:nth-child(3) { text-align: center; font-feature-settings: "tnum"; }
+        .timing-table th:nth-child(2), .timing-table th:nth-child(3) { text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>शहर सोलापुर की अहले हदीस मस्जिदों के टाईम</h1>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Loading..." disabled>
+                <button id="search-icon-btn" aria-label="Search Masjid">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div id="announcements-container"></div>
+            <div class="masjid-list">
+                <div class="loader"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="timing-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-masjid-name"></h2>
+            <div id="modal-table-container"></div>
+            <div id="modal-details"></div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const masjidListContainer = document.querySelector('.masjid-list');
+            const announcementsContainer = document.getElementById('announcements-container');
+            const modal = document.getElementById('timing-modal');
+            const closeBtn = document.querySelector('.close-btn');
+            const searchInput = document.getElementById('search-input');
+            const searchContainer = document.querySelector('.search-container');
+            const searchIconBtn = document.getElementById('search-icon-btn');
+            
+            const timingsSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWyaxD6lN2mP0qZT4qg1MPPsXi1Esg09xaVQ85zedbS6U37E7qM3pBHyxedxHpu-pxyFX9F3SzcMK2/pub?gid=0&single=true&output=tsv';
+            const announcementsSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWyaxD6lN2mP0qZT4qg1MPPsXi1Esg09xaVQ85zedbS6U37E7qM3pBHyxedxHpu-pxyFX9F3SzcMK2/pub?gid=1264328005&single=true&output=csv';
+
+            let masjidDataStore = {};
+            let announcementsStore = [];
+
+            function parseTimingsData(tsvText) {
+                const data = {};
+                const rows = tsvText.trim().split('\n');
+                for (let i = 1; i < rows.length; i++) {
+                    const cells = rows[i].split('\t');
+                    const name = cells[1] ? cells[1].trim() : '';
+                    if (!name) continue;
+                    const id = i;
+                    data[id] = {
+                        name: name,
+                        timings: [
+                            { prayer: 'फजर', azan: cells[3], jamaat: cells[4] },
+                            { prayer: 'जोहर', azan: cells[5], jamaat: cells[6] },
+                            { prayer: 'असर', azan: cells[7], jamaat: cells[8] },
+                            { prayer: 'मगरिब', azan: cells[9], jamaat: cells[10] },
+                            { prayer: 'ईशा', azan: cells[11], jamaat: cells[12] },
+                            { prayer: 'जुमा', azan: cells[13], jamaat: cells[14] },
+                        ],
+                        location: cells[15] ? cells[15].trim() : '',
+                        note: [cells[16], cells[17], cells[18]].filter(Boolean).map(n => n.trim())
+                    };
+                }
+                return data;
+            }
+
+            function parseAnnouncementsData(csvText) {
+                // Split the CSV text into rows, take the first 10, then process them.
+                return csvText.trim().split('\n').slice(0, 10).map(row => row.trim()).filter(Boolean);
+            }
+
+            function renderAnnouncements(announcements) {
+                announcementsContainer.innerHTML = '';
+                if (!announcements || announcements.length === 0) return;
+
+                announcements.forEach(text => {
+                    const card = document.createElement('div');
+                    card.className = 'announcement-card';
+                    card.innerHTML = `<span>📢</span><p>${text}</p>`;
+                    announcementsContainer.appendChild(card);
+                });
+            }
+
+            function renderMasjidList(data) {
+                masjidListContainer.innerHTML = '';
+                const keys = Object.keys(data);
+
+                if (keys.length === 0) {
+                    masjidListContainer.innerHTML = `<div class="info-message">No Masjid found.</div>`;
+                    return;
+                }
+
+                keys.forEach((key, index) => {
+                    const masjid = data[key];
+                    const card = document.createElement('button');
+                    card.className = 'masjid-card';
+                    card.dataset.masjidId = key;
+                    card.innerHTML = `<span>${index + 1}. ${masjid.name}</span>`;
+                    card.addEventListener('click', () => showModal(key));
+                    masjidListContainer.appendChild(card);
+                });
+            }
+
+            const showModal = (masjidId) => {
+                const data = masjidDataStore[masjidId];
+                if (!data) return;
+
+                document.getElementById('modal-masjid-name').textContent = data.name;
+                
+                let tableHTML = `<table class="timing-table"><thead><tr><th>नमाज़</th><th>अज़ान</th><th>जमाअत</th></tr></thead><tbody>`;
+                data.timings.forEach(time => {
+                    tableHTML += `<tr><td>${time.prayer}</td><td>${time.azan || '-'}</td><td>${time.jamaat || '-'}</td></tr>`;
+                });
+                tableHTML += `</tbody></table>`;
+                document.getElementById('modal-table-container').innerHTML = tableHTML;
+                
+                let detailsHTML = '';
+                const combinedNotes = (data.note && data.note.length > 0) ? data.note.join('<br>') : '';
+                if (combinedNotes) {
+                    detailsHTML += `<div class="special-note">${combinedNotes}</div>`;
+                }
+                if (data.location) {
+                    detailsHTML += `<div class="location-link-container"><a href="${data.location}" target="_blank" rel="noopener noreferrer">🗺️ Get Directions on Map</a></div>`;
+                }
+                document.getElementById('modal-details').innerHTML = detailsHTML;
+
+                modal.style.display = 'flex';
+            };
+            
+            const closeModal = () => { modal.style.display = 'none'; };
+            closeBtn.addEventListener('click', closeModal);
+            window.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+            window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModal(); });
+
+            searchIconBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (searchInput.disabled) return;
+                searchContainer.classList.toggle('active');
+                if (searchContainer.classList.contains('active')) searchInput.focus();
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!searchContainer.contains(e.target)) searchContainer.classList.remove('active');
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const hindiTerm = window.indicTransliteration.transliterate(searchTerm, 'en', 'hi');
+
+                const filteredData = Object.keys(masjidDataStore)
+                    .filter(key => {
+                        const masjidNameLower = masjidDataStore[key].name.toLowerCase();
+                        return masjidNameLower.includes(searchTerm) || masjidNameLower.includes(hindiTerm);
+                    })
+                    .reduce((obj, key) => {
+                        obj[key] = masjidDataStore[key];
+                        return obj;
+                    }, {});
+                renderMasjidList(filteredData);
+            });
+
+            async function loadAllData() {
+                try {
+                    const [timingsRes, announcementsRes] = await Promise.all([
+                        fetch(timingsSheetUrl),
+                        fetch(announcementsSheetUrl)
+                    ]);
+
+                    if (!timingsRes.ok) throw new Error(`Timings sheet error: ${timingsRes.statusText}`);
+                    if (!announcementsRes.ok) throw new Error(`Announcements sheet error: ${announcementsRes.statusText}`);
+                    
+                    const timingsText = await timingsRes.text();
+                    const announcementsText = await announcementsRes.text();
+
+                    masjidDataStore = parseTimingsData(timingsText);
+                    announcementsStore = parseAnnouncementsData(announcementsText);
+                    
+                    renderAnnouncements(announcementsStore);
+                    renderMasjidList(masjidDataStore);
+                    
+                    searchInput.disabled = false;
+                    searchInput.placeholder = "Search for a Masjid...";
+                } catch (error) {
+                    console.error('Failed to load sheet data:', error);
+                    masjidListContainer.innerHTML = `<div class="error-message">Could not load data. Please check your connection or try again later.</div>`;
+                    searchInput.placeholder = "Unavailable";
+                }
+            }
+
+            loadAllData();
+        });
+    </script>
+
+</body>
+</html>
+
