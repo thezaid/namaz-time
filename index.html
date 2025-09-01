@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masjid Timings | Solapur</title>
+    <title>Masjid Namaz Timings | Solapur</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Annapurna+SIL:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Transliteration library for smart search -->
-    <script src="https://cdn.jsdelivr.net/npm/indic-transliteration@2.0.0/dist/bundle.umd.js"></script>
     <style>
         :root {
-            --primary-bg: #f4f7f9;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --heading-color: #1a202c;
-            --primary-color: #3498db;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --font-family: 'Annapurna SIL', sans-serif; /* Change this one line to update the font */
+            /* --- Pastel Color Palette --- */
+            --primary-bg: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-color: #495057;
+            --heading-color: #212529;
+            --primary-color: #88a9c3; /* Soft Blue */
+            --primary-color-hover: #7b98b2;
+            --secondary-color: #a3c1ad; /* Soft Green */
+            --secondary-color-hover: #92b09c;
+            --danger-color: #d6a2a2; /* Soft Red */
+            --danger-color-hover: #c29191;
+            --border-color: #DEE2E6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.07);
+            --font-family: 'Annapurna SIL', sans-serif;
         }
 
         body {
@@ -27,8 +31,8 @@
             background-color: var(--primary-bg);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
-            line-height: 1.6;
+            padding: 15px;
+            line-height: 1.7;
         }
 
         .container { max-width: 700px; margin: 0 auto; padding: 20px 0; }
@@ -38,384 +42,493 @@
             align-items: center;
             margin-bottom: 30px;
             gap: 15px;
+            flex-wrap: wrap;
         }
         header h1 {
-            font-size: 1.6rem; /* Slightly adjusted for balance */
+            font-size: 1.8rem;
             font-weight: 700;
             color: var(--heading-color);
             margin: 0;
             text-align: left;
         }
         
-        /* --- Search Bar --- */
-        .search-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-        #search-input {
-            width: 0;
-            padding: 10px 0;
-            border-radius: 10px;
-            border: 1px solid transparent;
-            font-size: 1rem;
-            font-family: var(--font-family);
-            box-sizing: border-box;
-            outline: none;
-            opacity: 0;
-            transition: all 0.4s ease;
-        }
+        .header-controls { display: flex; align-items: center; gap: 10px; }
         
-        .search-container.active #search-input {
-            width: 250px;
-            opacity: 1;
-            border-color: var(--border-color);
-            padding: 10px 15px 10px 20px;
-        }
-
-        #search-icon-btn {
-            background: none;
-            border: none;
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             cursor: pointer;
             padding: 8px;
             border-radius: 50%;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow);
         }
-        #search-icon-btn:hover {
-            background-color: #e0e0e0;
+        .icon-btn:hover {
+            background-color: #fdfdfd;
+            box-shadow: var(--shadow-lg);
         }
-        #search-icon-btn svg {
-            width: 24px;
-            height: 24px;
-            color: #555;
-        }
-        #search-input:disabled + #search-icon-btn {
+        .icon-btn svg { width: 22px; height: 22px; color: #555; }
+        .icon-btn:disabled {
             cursor: not-allowed;
-            opacity: 0.5;
+            opacity: 0.6;
         }
-
-
-        /* --- Loading Spinner & Messages --- */
+        
+        .admin-controls { display: none; gap: 10px; }
+        body.logged-in .admin-controls { display: flex; }
+        body.logged-in #login-btn { display: none; }
+        
         .loader {
-            border: 5px solid #f3f3f3; border-top: 5px solid var(--primary-color);
+            border: 5px solid #f0f0f0; border-top: 5px solid var(--primary-color);
             border-radius: 50%; width: 40px; height: 40px;
             animation: spin 1s linear infinite; margin: 40px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .info-message {
-            text-align: center; color: #718096; padding: 20px;
-        }
-        .error-message {
-            text-align: center; background: #fffbe6; color: #92400e; padding: 15px;
-            border-radius: 8px; border: 1px solid #fde68a;
-        }
+        .info-message { text-align: center; color: #718096; padding: 20px; }
+        .error-message { text-align: center; background: #fffbe6; color: #92400e; padding: 15px; border-radius: 12px; border: 1px solid #fde68a; }
 
-        /* --- Announcement Card --- */
-        #announcements-container {
-            display: grid;
-            gap: 16px;
-            margin-bottom: 30px;
-        }
+        #announcements-container { display: grid; gap: 16px; margin-bottom: 30px; }
         .announcement-card {
-            background-color: #e6f6ff;
-            color: #2c5282;
-            border-left: 4px solid var(--primary-color);
-            padding: 15px 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            background-color: #e6f6ff; color: #2c5282; padding: 20px;
+            border-radius: 16px; display: flex; align-items: flex-start;
+            gap: 15px; border: 1px solid #cde9ff;
         }
-        .announcement-card span {
-            font-size: 1.5rem;
-        }
-         .announcement-card p {
-            margin: 0;
-            line-height: 1.5;
-        }
+        .announcement-card span { font-size: 1.5rem; line-height: 1.2; }
+        .announcement-card p { margin: 0; }
 
-        .masjid-list { display: grid; gap: 16px; }
+        .masjid-list { display: grid; gap: 15px; }
         .masjid-card {
-            background: var(--card-bg); border-radius: 12px; padding: 20px 25px;
-            box-shadow: var(--shadow); border: 1px solid var(--border-color);
-            cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
-            text-align: left; width: 100%; border: none; font-size: 1.1em;
-            font-weight: 600; color: #2d3748; display: flex;
-            justify-content: flex-start; align-items: center;
+            background: var(--card-bg); border-radius: 16px; padding: 25px;
+            box-shadow: var(--shadow); border: 1px solid transparent;
+            cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s, border-color 0.2s;
+            text-align: left; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .masjid-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .masjid-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+        .masjid-card-name { font-size: 1.2em; font-weight: 700; color: var(--heading-color); }
+        .masjid-card .card-actions { display: none; gap: 10px; }
+        body.logged-in .masjid-card .card-actions { display: flex; }
 
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-            width: 100%; height: 100%; overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px);
-            align-items: center; justify-content: center;
+            width: 100%; height: 100%; overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px); align-items: center; justify-content: center;
             padding: 15px; box-sizing: border-box; animation: fadeIn 0.3s ease;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .modal-content {
-            background-color: var(--card-bg); margin: auto; padding: 30px;
-            border-radius: 16px; box-shadow: var(--shadow-lg);
-            width: 100%; max-width: 500px; position: relative;
-            animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background-color: var(--primary-bg); margin: auto; padding: 20px;
+            border-radius: 20px; box-shadow: var(--shadow-lg); width: 100%;
+            max-width: 550px; position: relative; animation: slideUp 0.4s ease;
+            border: 1px solid var(--border-color);
         }
-        @keyframes slideUp { from { transform: translateY(30px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        .close-btn {
-            color: #999; position: absolute; top: 15px; right: 20px; font-size: 28px;
-            font-weight: bold; line-height: 1; cursor: pointer; transition: color 0.2s, transform 0.2s;
-        }
-        .close-btn:hover { color: #333; transform: rotate(90deg); }
-
-        #modal-masjid-name {
-            margin-top: 0; font-size: 1.5rem; font-weight: 700; color: var(--heading-color);
-            border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;
-        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; }
+        .modal-header h2 { margin: 0; font-size: 1.6rem; font-weight: 700; color: var(--heading-color); }
+        .close-btn { color: #999; font-size: 32px; font-weight: bold; cursor: pointer; background:none; border:none; line-height: 1; }
         
-        .location-link-container {
-            text-align: center;
-            margin-top: 25px;
-        }
-        .location-link-container a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .location-link-container a:hover {
-            text-decoration: underline;
-        }
-
-        .special-note {
-            font-size: 0.9em; background-color: #e6f6ff; color: #2c5282;
-            border-left: 4px solid var(--primary-color); padding: 12px 15px;
-            margin-top: 20px; border-radius: 6px;
-        }
-        
-        .timing-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .timing-table th, .timing-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        .timing-table th { 
-            font-weight: 700; /* Bolder heading */
-            font-size: 0.9rem; 
-            color: #718096; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-        }
+        #modal-table-container { background: var(--card-bg); padding: 15px; border-radius: 16px; margin-top: 20px; box-shadow: var(--shadow); }
+        .timing-table { width: 100%; border-collapse: collapse; }
+        .timing-table th, .timing-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         .timing-table tr:last-child td { border-bottom: none; }
-        .timing-table td:nth-child(1) {
-            font-weight: 700; /* Bolder prayer name */
-            font-size: 1.05em; /* Larger prayer name */
-            color: #4a5568;
+        .timing-table th { font-weight: 700; font-size: 1rem; color: var(--text-color); }
+        .timing-table td:nth-child(1) { font-weight: 700; font-size: 1.1em; color: var(--heading-color); }
+        
+        #modal-details { margin-top: 20px; display: grid; gap: 15px; }
+        .detail-card {
+            background: var(--card-bg); padding: 20px;
+            border-radius: 16px; box-shadow: var(--shadow);
         }
-        .timing-table td:nth-child(2), .timing-table td:nth-child(3) { text-align: center; font-feature-settings: "tnum"; }
-        .timing-table th:nth-child(2), .timing-table th:nth-child(3) { text-align: center; }
+        .detail-card h4 {
+            margin-top: 0; margin-bottom: 10px; color: var(--heading-color);
+            font-size: 1rem; font-weight: 700;
+        }
+        .detail-card p { margin: 0; line-height: 1.6; }
+        
+        .detail-card-link {
+            display: block;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--heading-color);
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .detail-card-link:hover {
+            transform: translateY(-5px); 
+            box-shadow: var(--shadow-lg);
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 1rem; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 12px; border-radius: 12px;
+            border: 1px solid var(--border-color); font-size: 1rem; font-family: var(--font-family);
+            box-sizing: border-box; background-color: #FFFFFF;
+        }
+        .form-group textarea { min-height: 150px; }
+         .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(136, 169, 195, 0.3);
+        }
+        .form-timings { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        
+        .auth-btn, .submit-btn {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            background-color: var(--primary-color); color: white; font-size: 1.1em;
+            font-weight: 700; cursor: pointer; transition: background-color 0.2s, transform 0.2s;
+        }
+        .auth-btn:hover, .submit-btn:hover { 
+            background-color: var(--primary-color-hover); 
+            transform: translateY(-2px); 
+        }
+        .submit-btn { background-color: var(--secondary-color); }
+        .submit-btn:hover { background-color: var(--secondary-color-hover); }
+
+        #delete-masjid-btn { background-color: var(--danger-color); margin-top: 10px; }
+        #delete-masjid-btn:hover { background-color: var(--danger-color-hover); }
+
+        .auth-error { color: var(--danger-color); text-align: center; margin-top: 15px; font-weight: 700; }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            header h1 { font-size: 1.5rem; }
+            .masjid-card { padding: 20px; }
+            .masjid-card-name { font-size: 1.1em; }
+            .modal-content { padding: 15px; }
+            .modal-header h2 { font-size: 1.4rem; }
+            #modal-table-container, #modal-details { margin-top: 15px; }
+            .timing-table th, .timing-table td { padding: 8px; }
+            .timing-table td:nth-child(1) { font-size: 1em; }
+        }
     </style>
 </head>
 <body>
-
     <div class="container">
         <header>
             <h1>शहर सोलापुर की अहले हदीस मस्जिदों के टाईम</h1>
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="Loading..." disabled>
-                <button id="search-icon-btn" aria-label="Search Masjid">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"/></svg>
+            <div class="header-controls">
+                <div class="admin-controls">
+                    <button id="edit-announcements-btn" class="icon-btn" title="Edit Announcements">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688 0-1.25-.562-1.25-1.25s.562-1.25 1.25-1.25h3.32c.688 0 1.25.562 1.25 1.25s-.562 1.25-1.25 1.25h-3.32zM9.09 11.09c-.688 0-1.25-.562-1.25-1.25s.562-1.25 1.25-1.25h5.82c.688 0 1.25.562 1.25 1.25s-.562 1.25-1.25 1.25H9.09zM7.84 6.34c-.688 0-1.25-.562-1.25-1.25s.562-1.25 1.25-1.25h8.32c.688 0 1.25.562 1.25 1.25s-.562 1.25-1.25 1.25H7.84zM4.59 19.59c0-1.25.562-2.313 1.25-3.031.688-.719 1.625-1.156 2.75-1.156h7.82c1.125 0 2.063.438 2.75 1.156.688.718 1.25 1.781 1.25 3.031 0 1.25-.562 2.313-1.25 3.031-.687.719-1.625 1.156-2.75 1.156H8.59c-1.125 0-2.063-.438-2.75-1.156C5.152 21.903 4.59 20.84 4.59 19.59z"/></svg>
+                    </button>
+                    <button id="add-masjid-btn" class="icon-btn" title="Add Masjid">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    </button>
+                </div>
+                <button id="login-btn" class="icon-btn" title="Admin Login">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
                 </button>
+                <div class="admin-controls">
+                    <button id="logout-btn" class="icon-btn" title="Logout">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m-3 0l-3-3m0 0l3-3m-3-3H9" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </header>
-
         <main>
             <div id="announcements-container"></div>
-            <div class="masjid-list">
-                <div class="loader"></div>
-            </div>
+            <div class="masjid-list"><div class="loader"></div></div>
         </main>
     </div>
 
-    <div id="timing-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-masjid-name"></h2>
-            <div id="modal-table-container"></div>
-            <div id="modal-details"></div>
-        </div>
-    </div>
+    <!-- Modals -->
+    <div id="view-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="modal-masjid-name"></h2><button class="close-btn" data-close>&times;</button></div><div id="modal-table-container"></div><div id="modal-details"></div></div></div>
+    <div id="login-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Admin Login</h2><button class="close-btn" data-close>&times;</button></div><form id="login-form" style="padding: 10px 15px;"><div class="form-group"><label for="username">Username</label><input type="text" id="username" required></div><div class="form-group"><label for="password">Password</label><input type="password" id="password" required></div><button type="submit" class="auth-btn">Login</button><p class="auth-error" id="login-error"></p></form></div></div>
+    <div id="edit-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="edit-modal-title"></h2><button class="close-btn" data-close>&times;</button></div><form id="edit-form"><input type="hidden" id="masjid-id"><div class="form-group"><label for="masjid-name">Masjid Name</label><input type="text" id="masjid-name" required></div><hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;"><p><strong>Timings:</strong></p><div class="form-timings"><div class="form-group"><label>फजर अज़ान</label><input type="time" id="fajr-azan"></div><div class="form-group"><label>फजर जमाअत</label><input type="time" id="fajr-jamaat"></div><div class="form-group"><label>जोहर अज़ान</label><input type="time" id="zohar-azan"></div><div class="form-group"><label>जोहर जमाअत</label><input type="time" id="zohar-jamaat"></div><div class="form-group"><label>असर अज़ान</label><input type="time" id="asar-azan"></div><div class="form-group"><label>असर जमाअत</label><input type="time" id="asar-jamaat"></div><div class="form-group"><label>मगरिब अज़ान</label><input type="time" id="maghrib-azan"></div><div class="form-group"><label>मगरिब जमाअत</label><input type="time" id="maghrib-jamaat"></div><div class="form-group"><label>ईशा अज़ान</label><input type="time" id="isha-azan"></div><div class="form-group"><label>ईशा जमाअत</label><input type="time" id="isha-jamaat"></div><div class="form-group"><label>जुमा अज़ान</label><input type="time" id="juma-azan"></div><div class="form-group"><label>जुमा जमाअत</label><input type="time" id="juma-jamaat"></div></div><hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;"><div class="form-group"><label for="masjid-location">Location URL</label><input type="url" id="masjid-location"></div><div class="form-group"><label for="masjid-notes">Notes (separate with a new line)</label><textarea id="masjid-notes"></textarea></div><button type="submit" class="submit-btn">Save Changes</button><button type="button" id="delete-masjid-btn" class="submit-btn">Delete Masjid</button></form></div></div>
+    <div id="announcements-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Edit Announcements</h2><button class="close-btn" data-close>&times;</button></div><form id="announcements-form" style="padding: 10px 15px;"><div class="form-group"><label for="announcements-editor">Enter each announcement on a new line (max 10).</label><textarea id="announcements-editor"></textarea></div><button type="submit" class="submit-btn">Save Announcements</button></form></div></div>
 
     <script>
-        window.addEventListener('load', () => {
-            const masjidListContainer = document.querySelector('.masjid-list');
-            const announcementsContainer = document.getElementById('announcements-container');
-            const modal = document.getElementById('timing-modal');
-            const closeBtn = document.querySelector('.close-btn');
-            const searchInput = document.getElementById('search-input');
-            const searchContainer = document.querySelector('.search-container');
-            const searchIconBtn = document.getElementById('search-icon-btn');
-            
-            const timingsSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWyaxD6lN2mP0qZT4qg1MPPsXi1Esg09xaVQ85zedbS6U37E7qM3pBHyxedxHpu-pxyFX9F3SzcMK2/pub?gid=0&single=true&output=tsv';
-            const announcementsSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWyaxD6lN2mP0qZT4qg1MPPsXi1Esg09xaVQ85zedbS6U37E7qM3pBHyxedxHpu-pxyFX9F3SzcMK2/pub?gid=1264328005&single=true&output=csv';
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURATION ---
+        const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbywMTSOHcUFjF7ZTE-kV5Fxu86ZPRuOGCrmaAOulElduOUEnzD9E0TX5lEFjmkwd938/exec'; 
+        
+        let masjidDataStore = {};
+        let announcementsStore = [];
+        const prayers = ['fajr', 'zohar', 'asar', 'maghrib', 'isha', 'juma'];
+        const prayerNameMap = {
+            'Fajr': 'फजर', 'Zohar': 'जोहर', 'Asar': 'असर',
+            'Maghrib': 'मगरिब', 'Isha': 'ईशा', 'Juma': 'जुमा'
+        };
 
-            let masjidDataStore = {};
-            let announcementsStore = [];
+        // --- UI ELEMENTS ---
+        const masjidListContainer = document.querySelector('.masjid-list');
+        const announcementsContainer = document.getElementById('announcements-container');
+        // ... (all other UI elements)
+        const editAnnouncementsBtn = document.getElementById('edit-announcements-btn');
+        const announcementsModal = document.getElementById('announcements-modal');
+        const announcementsForm = document.getElementById('announcements-form');
+        const announcementsEditor = document.getElementById('announcements-editor');
+        const viewModal = document.getElementById('view-modal');
+        const loginModal = document.getElementById('login-modal');
+        const editModal = document.getElementById('edit-modal');
+        const allModals = document.querySelectorAll('.modal');
+        const allCloseBtns = document.querySelectorAll('[data-close]');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const addMasjidBtn = document.getElementById('add-masjid-btn');
+        const loginForm = document.getElementById('login-form');
+        const editForm = document.getElementById('edit-form');
+        const deleteBtn = document.getElementById('delete-masjid-btn');
 
-            function parseTimingsData(tsvText) {
+
+        // --- HELPERS ---
+        function formatTimeTo12Hour(timeString) {
+            if (!timeString || !timeString.includes(':')) return timeString;
+            let [hours, minutes] = timeString.split(':');
+            hours = parseInt(hours);
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12; 
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        // --- DATA HANDLING ---
+        async function loadAllData() {
+            masjidListContainer.innerHTML = '<div class="loader"></div>';
+            announcementsContainer.innerHTML = '';
+            try {
+                const response = await fetch(googleWebAppUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: JSON.stringify({ action: 'readData' })
+                });
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const result = await response.json();
+                if (result.status !== 'success') throw new Error(result.message);
+
+                // Process Timings
+                const timingsData = result.timings;
                 const data = {};
-                const rows = tsvText.trim().split('\n');
-                for (let i = 1; i < rows.length; i++) {
-                    const cells = rows[i].split('\t');
-                    const name = cells[1] ? cells[1].trim() : '';
-                    if (!name) continue;
-                    const id = i;
-                    data[id] = {
-                        name: name,
+                const rows = timingsData.slice(1);
+                rows.forEach((row, index) => {
+                    const name = row[1] ? row[1].trim() : '';
+                    if (!name) return;
+                    data[`masjid-${index}`] = {
+                        name,
                         timings: [
-                            { prayer: 'फजर', azan: cells[3], jamaat: cells[4] },
-                            { prayer: 'जोहर', azan: cells[5], jamaat: cells[6] },
-                            { prayer: 'असर', azan: cells[7], jamaat: cells[8] },
-                            { prayer: 'मगरिब', azan: cells[9], jamaat: cells[10] },
-                            { prayer: 'ईशा', azan: cells[11], jamaat: cells[12] },
-                            { prayer: 'जुमा', azan: cells[13], jamaat: cells[14] },
+                            { prayer: 'Fajr', azan: row[3], jamaat: row[4] }, { prayer: 'Zohar', azan: row[5], jamaat: row[6] },
+                            { prayer: 'Asar', azan: row[7], jamaat: row[8] }, { prayer: 'Maghrib', azan: row[9], jamaat: row[10] },
+                            { prayer: 'Isha', azan: row[11], jamaat: row[12] }, { prayer: 'Juma', azan: row[13], jamaat: row[14] }
                         ],
-                        location: cells[15] ? cells[15].trim() : '',
-                        note: [cells[16], cells[17], cells[18]].filter(Boolean).map(n => n.trim())
+                        location: row[15] ? row[15].trim() : '',
+                        note: [row[16], row[17], row[18]].filter(Boolean).map(n => n.trim())
                     };
-                }
-                return data;
-            }
-
-            function parseAnnouncementsData(csvText) {
-                // Split the CSV text into rows, take the first 10, then process them.
-                return csvText.trim().split('\n').slice(0, 10).map(row => row.trim()).filter(Boolean);
-            }
-
-            function renderAnnouncements(announcements) {
-                announcementsContainer.innerHTML = '';
-                if (!announcements || announcements.length === 0) return;
-
-                announcements.forEach(text => {
-                    const card = document.createElement('div');
-                    card.className = 'announcement-card';
-                    card.innerHTML = `<span>📢</span><p>${text}</p>`;
-                    announcementsContainer.appendChild(card);
                 });
+                masjidDataStore = data;
+                renderMasjidList(masjidDataStore);
+
+                // Process Announcements
+                announcementsStore = result.announcements || [];
+                renderAnnouncements(announcementsStore);
+
+            } catch (error) {
+                console.error("Failed to load data:", error);
+                masjidListContainer.innerHTML = `<p class="error-message">Could not load data. Please check your connection.</p>`;
             }
+        }
+        
+        // --- AUTHENTICATION ---
+        function checkLoginState() {
+            if (sessionStorage.getItem('isAdmin') === 'true') document.body.classList.add('logged-in');
+            else document.body.classList.remove('logged-in');
+        }
 
-            function renderMasjidList(data) {
-                masjidListContainer.innerHTML = '';
-                const keys = Object.keys(data);
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorP = document.getElementById('login-error');
+            const submitBtn = loginForm.querySelector('.auth-btn');
+            errorP.textContent = '';
+            submitBtn.textContent = 'Checking...';
+            submitBtn.disabled = true;
 
-                if (keys.length === 0) {
-                    masjidListContainer.innerHTML = `<div class="info-message">No Masjid found.</div>`;
-                    return;
-                }
-
-                keys.forEach((key, index) => {
-                    const masjid = data[key];
-                    const card = document.createElement('button');
-                    card.className = 'masjid-card';
-                    card.dataset.masjidId = key;
-                    card.innerHTML = `<span>${index + 1}. ${masjid.name}</span>`;
-                    card.addEventListener('click', () => showModal(key));
-                    masjidListContainer.appendChild(card);
+            try {
+                 const response = await fetch(googleWebAppUrl, {
+                    method: 'POST', mode: 'cors',
+                    body: JSON.stringify({ action: 'login', username, password })
                 });
+                const result = await response.json();
+                if (result.isAdmin) {
+                    sessionStorage.setItem('isAdmin', 'true');
+                    checkLoginState();
+                    closeAllModals();
+                } else {
+                    errorP.textContent = "Invalid credentials.";
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorP.textContent = "Could not connect to server.";
+            } finally {
+                submitBtn.textContent = 'Login';
+                submitBtn.disabled = false;
             }
-
-            const showModal = (masjidId) => {
-                const data = masjidDataStore[masjidId];
-                if (!data) return;
-
-                document.getElementById('modal-masjid-name').textContent = data.name;
-                
-                let tableHTML = `<table class="timing-table"><thead><tr><th>नमाज़</th><th>अज़ान</th><th>जमाअत</th></tr></thead><tbody>`;
-                data.timings.forEach(time => {
-                    tableHTML += `<tr><td>${time.prayer}</td><td>${time.azan || '-'}</td><td>${time.jamaat || '-'}</td></tr>`;
-                });
-                tableHTML += `</tbody></table>`;
-                document.getElementById('modal-table-container').innerHTML = tableHTML;
-                
-                let detailsHTML = '';
-                const combinedNotes = (data.note && data.note.length > 0) ? data.note.join('<br>') : '';
-                if (combinedNotes) {
-                    detailsHTML += `<div class="special-note">${combinedNotes}</div>`;
-                }
-                if (data.location) {
-                    detailsHTML += `<div class="location-link-container"><a href="${data.location}" target="_blank" rel="noopener noreferrer">🗺️ Get Directions on Map</a></div>`;
-                }
-                document.getElementById('modal-details').innerHTML = detailsHTML;
-
-                modal.style.display = 'flex';
-            };
-            
-            const closeModal = () => { modal.style.display = 'none'; };
-            closeBtn.addEventListener('click', closeModal);
-            window.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
-            window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModal(); });
-
-            searchIconBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (searchInput.disabled) return;
-                searchContainer.classList.toggle('active');
-                if (searchContainer.classList.contains('active')) searchInput.focus();
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!searchContainer.contains(e.target)) searchContainer.classList.remove('active');
-            });
-
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                const hindiTerm = window.indicTransliteration.transliterate(searchTerm, 'en', 'hi');
-
-                const filteredData = Object.keys(masjidDataStore)
-                    .filter(key => {
-                        const masjidNameLower = masjidDataStore[key].name.toLowerCase();
-                        return masjidNameLower.includes(searchTerm) || masjidNameLower.includes(hindiTerm);
-                    })
-                    .reduce((obj, key) => {
-                        obj[key] = masjidDataStore[key];
-                        return obj;
-                    }, {});
-                renderMasjidList(filteredData);
-            });
-
-            async function loadAllData() {
-                try {
-                    const [timingsRes, announcementsRes] = await Promise.all([
-                        fetch(timingsSheetUrl),
-                        fetch(announcementsSheetUrl)
-                    ]);
-
-                    if (!timingsRes.ok) throw new Error(`Timings sheet error: ${timingsRes.statusText}`);
-                    if (!announcementsRes.ok) throw new Error(`Announcements sheet error: ${announcementsRes.statusText}`);
-                    
-                    const timingsText = await timingsRes.text();
-                    const announcementsText = await announcementsRes.text();
-
-                    masjidDataStore = parseTimingsData(timingsText);
-                    announcementsStore = parseAnnouncementsData(announcementsText);
-                    
-                    renderAnnouncements(announcementsStore);
-                    renderMasjidList(masjidDataStore);
-                    
-                    searchInput.disabled = false;
-                    searchInput.placeholder = "Search for a Masjid...";
-                } catch (error) {
-                    console.error('Failed to load sheet data:', error);
-                    masjidListContainer.innerHTML = `<div class="error-message">Could not load data. Please check your connection or try again later.</div>`;
-                    searchInput.placeholder = "Unavailable";
-                }
-            }
-
-            loadAllData();
         });
-    </script>
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('isAdmin');
+            checkLoginState();
+        });
 
+
+        // --- RENDERING ---
+        function renderAnnouncements(announcements) {
+            announcementsContainer.innerHTML = '';
+            if (!announcements || announcements.length === 0) return;
+            announcements.forEach(text => {
+                const card = document.createElement('div');
+                card.className = 'announcement-card';
+                card.innerHTML = `<span>📢</span><p>${text}</p>`;
+                announcementsContainer.appendChild(card);
+            });
+        }
+        
+        function renderMasjidList(data) {
+            masjidListContainer.innerHTML = '';
+            if (!data || Object.keys(data).length === 0) {
+                masjidListContainer.innerHTML = `<p class="info-message">No masjids found.</p>`;
+                return;
+            }
+            Object.entries(data).forEach(([id, masjid]) => {
+                const card = document.createElement('div');
+                card.className = 'masjid-card';
+                card.innerHTML = `<span class="masjid-card-name">${masjid.name}</span><div class="card-actions"><button class="icon-btn edit-btn" data-id="${id}" title="Edit Masjid"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg></button></div>`;
+                card.addEventListener('click', () => showViewModal(id));
+                card.querySelector('.edit-btn')?.addEventListener('click', (e) => { e.stopPropagation(); openEditModal(id); });
+                masjidListContainer.appendChild(card);
+            });
+        }
+        
+        // --- MODAL & CRUD LOGIC ---
+        const openModal = (modal) => modal.style.display = 'flex';
+        const closeAllModals = () => allModals.forEach(m => m.style.display = 'none');
+        allCloseBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
+        loginBtn.addEventListener('click', () => openModal(loginModal));
+        addMasjidBtn.addEventListener('click', () => openEditModal());
+        editAnnouncementsBtn.addEventListener('click', () => {
+            announcementsEditor.value = announcementsStore.join('\n');
+            openModal(announcementsModal);
+        });
+
+        function showViewModal(masjidId) {
+            const data = masjidDataStore[masjidId];
+            document.getElementById('modal-masjid-name').textContent = data.name;
+            let tableHTML = `<table class="timing-table"><thead><tr><th>नमाज़</th><th>अज़ान</th><th>जमाअत</th></tr></thead><tbody>`;
+            data.timings.forEach(t => { 
+                const marathiPrayerName = prayerNameMap[t.prayer] || t.prayer;
+                tableHTML += `<tr><td>${marathiPrayerName}</td><td>${formatTimeTo12Hour(t.azan) || '-'}</td><td>${formatTimeTo12Hour(t.jamaat) || '-'}</td></tr>`;
+            });
+            document.getElementById('modal-table-container').innerHTML = tableHTML + `</tbody></table>`;
+            
+            let detailsHTML = '';
+            if (data.note && data.note.length > 0) detailsHTML += `<div class="detail-card"><h4>Notices</h4><p>${data.note.join('<br>')}</p></div>`;
+            if (data.location) detailsHTML += `<a href="${data.location}" target="_blank" rel="noopener noreferrer" class="detail-card detail-card-link">🗺️ लोकेशन</a>`;
+            document.getElementById('modal-details').innerHTML = detailsHTML;
+            openModal(viewModal);
+        }
+
+        function openEditModal(masjidId = null) {
+            editForm.reset();
+            const isEditing = !!masjidId;
+            document.getElementById('edit-modal-title').textContent = isEditing ? 'Edit Masjid' : 'Add New Masjid';
+            document.getElementById('masjid-id').value = masjidId || '';
+            deleteBtn.style.display = isEditing ? 'block' : 'none';
+            if (isEditing) {
+                const data = masjidDataStore[masjidId];
+                document.getElementById('masjid-name').value = data.name;
+                data.timings.forEach(t => {
+                    const prayerKey = t.prayer.toLowerCase();
+                    if(prayers.includes(prayerKey)){
+                        document.getElementById(`${prayerKey}-azan`).value = t.azan;
+                        document.getElementById(`${prayerKey}-jamaat`).value = t.jamaat;
+                    }
+                });
+                document.getElementById('masjid-location').value = data.location || '';
+                document.getElementById('masjid-notes').value = (data.note || []).join('\n');
+            }
+            openModal(editModal);
+        }
+
+        async function saveData(action, data) {
+            const btn = document.querySelector(`#${action === 'updateTimings' ? 'edit' : 'announcements'}-form .submit-btn`);
+            const originalText = btn.textContent;
+            btn.textContent = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(googleWebAppUrl, {
+                    method: 'POST', mode: 'cors',
+                    body: JSON.stringify({ action, data })
+                });
+                const result = await response.json();
+                if (result.status !== 'success') throw new Error(result.message);
+                
+                if (action === 'updateAnnouncements') {
+                    announcementsStore = data;
+                    renderAnnouncements(announcementsStore);
+                } else {
+                    renderMasjidList(masjidDataStore);
+                }
+                closeAllModals();
+
+            } catch (error) {
+                console.error(`Failed to save ${action}:`, error);
+                alert(`Error: Could not save data. Please try again.`);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        announcementsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newAnnouncements = announcementsEditor.value.split('\n').filter(Boolean);
+            await saveData('updateAnnouncements', newAnnouncements);
+        });
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let masjidId = document.getElementById('masjid-id').value || `masjid-${Date.now()}`;
+            masjidDataStore[masjidId] = {
+                name: document.getElementById('masjid-name').value,
+                timings: prayers.map(p => ({
+                    prayer: p.charAt(0).toUpperCase() + p.slice(1),
+                    azan: document.getElementById(`${p}-azan`).value,
+                    jamaat: document.getElementById(`${p}-jamaat`).value,
+                })),
+                location: document.getElementById('masjid-location').value,
+                note: document.getElementById('masjid-notes').value.split('\n').filter(Boolean)
+            };
+            await saveData('updateTimings', masjidDataStore);
+        });
+
+        deleteBtn.addEventListener('click', async () => {
+            const masjidId = document.getElementById('masjid-id').value;
+            if (masjidId && confirm('Are you sure you want to delete this masjid?')) {
+                delete masjidDataStore[masjidId];
+                await saveData('updateTimings', masjidDataStore);
+            }
+        });
+
+        // --- INITIALIZE APP ---
+        checkLoginState();
+        loadAllData();
+    });
+    </script>
 </body>
 </html>
 
